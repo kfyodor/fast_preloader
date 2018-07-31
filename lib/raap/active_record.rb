@@ -1,34 +1,42 @@
 module Raap
   module ActiveRecord
-    if defined?(::ActiveRecord)
+    def self.init
+      active_record_version = [
+        ::ActiveRecord::VERSION::MAJOR,
+        ::ActiveRecord::VERSION::MINOR
+      ].join('.')
+
       case active_record_version
       when '5.1'
-        require 'active_record/active_record51.rb'
+        require 'raap/active_record/active_record51.rb'
       else
         raise "[Raap] ActiveRecord #{active_record_version} is not supported."
       end
 
-      ::ActiveRecord::Base.extend Module.new do
+      ::ActiveRecord::Base.include BaseExt
+    end
+
+    module BaseExt
+      extend ActiveSupport::Concern
+
+      included do
+        class_attribute :_raap
+        extend ClassMethods
+      end
+
+      module ClassMethods
         def raap(enabled = true)
-          @raap_enabled = enabled
+          self._raap = enabled
         end
 
-        def raap_enalbed?
-          if defined?(@raap_enabled)
-            @raap_enabled
-          else
+        def raap_enabled?
+          if self._raap.nil?
             Raap.enabled?
+          else
+            self._raap
           end
         end
       end
-    else
-      raise "[Raap] ActiveRecord could not be found"
-    end
-
-    private
-
-    def active_record_version
-      [::ActiveRecord::VERSION::MAJOR, ::ActiveRecord::VERSION::MINOR].join('.')
     end
   end
 end

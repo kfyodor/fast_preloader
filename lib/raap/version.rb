@@ -1,3 +1,3 @@
-module ActiverecordPreloader
+module Raap
   VERSION = "0.1.0"
 end

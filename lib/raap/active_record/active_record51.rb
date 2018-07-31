@@ -1,7 +1,7 @@
 module Raap
   module ActiveRecord
-    ::ActiveRecord::Relation.prepend Module.new do
-      def raap(enabled = true)
+    module RelationExt
+      def with_raap(enabled = true)
         @raap_enabled = enabled
         self
       end
@@ -34,5 +34,7 @@ module Raap
         end
       end
     end
+
+    ::ActiveRecord::Relation.prepend RelationExt
   end
 end

@@ -1,4 +1,5 @@
 require 'raap/version'
+require 'raap/active_record'
 
 module Raap
   autoload :Preloader, 'raap/preloader'
@@ -15,4 +16,8 @@ module Raap
   def self.enabled?
     !!@enabled
   end
+end
+
+ActiveSupport.on_load(:active_record) do
+  Raap::ActiveRecord.init
 end

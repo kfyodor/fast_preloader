@@ -1,13 +1,8 @@
-require 'index'
-require 'graph'
-require 'association'
-
 module Raap
   class Preloader
-
-    autoload :Index, 'raap/index'
-    autoload :Graph, 'raap/graph'
-    autoload :Association, 'raap/association'
+    autoload :Index,       'raap/preloader/index'
+    autoload :Graph,       'raap/preloader/graph'
+    autoload :Association, 'raap/preloader/association'
 
     def preload(records, associations, preload_scope = nil)
       records = Array.wrap(records).compact
