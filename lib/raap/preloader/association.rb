@@ -1,3 +1,5 @@
+require 'active_record_union'
+
 module Raap
   class Preloader
     class Association
