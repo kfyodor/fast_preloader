@@ -1,3 +1,5 @@
+require 'set'
+
 module Raap
   class Preloader
     class Graph
@@ -6,8 +8,8 @@ module Raap
 
         def initialize(klass)
           @klass = klass
-          @incoming_edges = []
-          @outgoing_edges = []
+          @incoming_edges = Set.new
+          @outgoing_edges = Set.new
         end
 
         def inspect

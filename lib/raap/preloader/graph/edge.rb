@@ -12,7 +12,7 @@ module Raap
           @reflection = reflection
 
           # indicates if an edge is used for fetchng middle records
-          # for through assoc
+          # in through association
           @skip_loading = skip_loading
         end
 
@@ -74,6 +74,19 @@ module Raap
         def inspect
           "#{from.klass}->#{to.klass}"
         end
+
+        def hash
+          @from.klass.hash ^ @to.klass.hash ^ @reflection.name.hash ^ @skip_loading.hash
+        end
+
+        def ==(other)
+          from.klass == other.from.klass and
+          to.klass == other.to.klass and
+          reflection.name == other.reflection.name and
+          skip_loading? == other.skip_loading?
+        end
+
+        alias eql? ==
 
         private
 

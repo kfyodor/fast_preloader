@@ -43,15 +43,15 @@ module Raap
             record.send(edge.primary_key),
             edge.reflection,
             edge.through
-          ).uniq.each do |owner|
+          ).each do |owner|
             assoc = owner.association(edge.reflection.name)
 
             # TODO are duplicate records possible in collection????
             if edge.collection?
-              # include? check is slow here. maybe make edges uniq by assoc_name and load_klass????
-              assoc.target << record unless assoc.target.include?(record)
+              # include? check is slow here. maybe make edges uniq by assoc_name and join_klassend_date
+              assoc.target << record
             else
-              assoc.target = record unless assoc.target.present?
+              assoc.target = record
             end
           end
         end

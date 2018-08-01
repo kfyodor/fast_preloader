@@ -31,21 +31,13 @@ module Raap
 
         edge = Edge.new(parent_vertex, child_vertex, child_reflection, skip_loading: skip_loading)
         edge.from.outgoing_edges << edge
-        edge.to.incoming_edges   << edge
+        edge.to.incoming_edges << edge
 
         edge
       end
 
-      def empty?
-        @vertices.empty?
-      end
-
       def inspect
         "<Raap::Graph vertices=#{@vertices.values}"
-      end
-
-      def each(&block)
-        @vertices.values.each(&block)
       end
 
       def tsort
