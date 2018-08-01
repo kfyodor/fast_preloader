@@ -1,6 +1,9 @@
-# Rails Altenative Association Preloader (RAAP)
+# Graph-based Associations Preloader for Rails' ActiveRecord
 
-A faster way to preload ActiveRecord associations in Rails that uses way less queries in complex `includes` graphs.
+A faster way to preload complex ActiveRecord associations graphs that uses way less queries.
+
+Why?
+Just check the logs. (TODO: Pics later)
 
 How it works?
 - Associations are added to the DAG (direct acyclic graph) where vetrices are "models" and edges are relationships between them.
@@ -16,49 +19,48 @@ Supported Rails versions: 5.0 (later), 5.1 (only this one for now), 5.2 (later)
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'raap'
+# it's still alpha, I'll push it to Rubygems as soon as specs and perftests are done
+gem 'fast_preloader', git: 'https://github.com/konukhov/fast_preloader'
 ```
 
 And then execute:
 
     $ bundle
 
-Or install it yourself as:
-
-    $ gem install raap
 	
 ## Caveats
 
 This gem is in early development so:
-- It doesn't have `through` assocs support yet (soon)
 - Doest't support polymorphic records yet
-- It cannot properly load self references (e.g. `User.has_one :inviter, class_name: 'User'`)
-- It cannot load circular references (User->Comment, Comment->User) yet. Rails can because each association it loads each assoc independently.
+- It cannot load circular references (User->Comment, Comment->User) yet. Rails can because it loads each association independently.
+- I'm sure it has a lot of bugs
+
+TODO: perf, specs etc.
 
 ## Usage
 
 To use globally:
 
 ```ruby
-# put it in config/initializers/raap.rb
-Raap.enable!
+# put it in config/initializers/fast_preloader.rb
+FastPreloader.enable!
 ```
 
 To use in a model
 
 ```ruby
 class SomeModel < ApplicationRecord
-  raap # enabled
-  raap true # same
-  raap false # disabled for this particular model
+  fast_preloader # enabled
+  fast_preloader true # same
+  fast_preloader false # disabled for this particular model
 end
 ```
 
 To use in a scope
 
 ```ruby
-SomeModel.includes(:some, associations: [:custom, :preloading]).with_raap # enable for query
-SomeModel.includes(:some, associations: [:rails, :preloading]).with_raap(false) # disable for query
+SomeModel.includes(:some, associations: [:custom, :preloading]).with_fast_preloader # enable for query
+SomeModel.includes(:some, associations: [:rails, :preloading]).with_fast_preloader(false) # disable for query
 ```
 
 ## Development
@@ -69,7 +71,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/konukhov/raap. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/konukhov/fast_preloader. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -77,4 +79,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the RAAP project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/activerecord_preloader/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the Fast Preloader project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/activerecord_preloader/blob/master/CODE_OF_CONDUCT.md).

@@ -1,4 +1,4 @@
-module Raap
+module FastPreloader
   module ActiveRecord
     def self.init
       active_record_version = [
@@ -8,9 +8,9 @@ module Raap
 
       case active_record_version
       when '5.1'
-        require 'raap/active_record/active_record51.rb'
+        require 'fast_preloader/active_record/active_record51.rb'
       else
-        raise "[Raap] ActiveRecord #{active_record_version} is not supported."
+        raise "[FastPreloader] ActiveRecord #{active_record_version} is not supported."
       end
 
       ::ActiveRecord::Base.include BaseExt
@@ -20,20 +20,20 @@ module Raap
       extend ActiveSupport::Concern
 
       included do
-        class_attribute :_raap
+        class_attribute :_fast_preloader
         extend ClassMethods
       end
 
       module ClassMethods
-        def raap(enabled = true)
-          self._raap = enabled
+        def fast_preloader(enabled = true)
+          self._fast_preloader = enabled
         end
 
-        def raap_enabled?
-          if self._raap.nil?
-            Raap.enabled?
+        def fast_preloader_enabled?
+          if self._fast_preloader.nil?
+            FastPreloader.enabled?
           else
-            self._raap
+            self._fast_preloader
           end
         end
       end

@@ -1,16 +1,16 @@
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "raap/version"
+require "fast_preloader/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "raap"
-  spec.version       = Raap::VERSION
+  spec.name          = "fast_preloader"
+  spec.version       = FastPreloader::VERSION
   spec.authors       = ["Theodore Konukhov"]
   spec.email         = ["me@thdr.io"]
 
   spec.summary       = %q{Rails Alternative Association Preloader}
   spec.description   = %q{Faster association preloader for ActiveRecord}
-  spec.homepage      = "https://github.com/konukhov/raap"
+  spec.homepage      = "https://github.com/konukhov/fast_preloader"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'

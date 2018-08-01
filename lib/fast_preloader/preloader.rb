@@ -1,8 +1,8 @@
-module Raap
+module FastPreloader
   class Preloader
-    autoload :Index,       'raap/preloader/index'
-    autoload :Graph,       'raap/preloader/graph'
-    autoload :Association, 'raap/preloader/association'
+    autoload :Index,       'fast_preloader/preloader/index'
+    autoload :Graph,       'fast_preloader/preloader/graph'
+    autoload :Association, 'fast_preloader/preloader/association'
 
     def preload(records, associations, preload_scope = nil)
       records = Array.wrap(records).compact

@@ -1,6 +1,6 @@
 require 'set'
 
-module Raap
+module FastPreloader
   class Preloader
     class Graph
       class Vertex

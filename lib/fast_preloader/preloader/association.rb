@@ -1,6 +1,6 @@
 require 'active_record_union'
 
-module Raap
+module FastPreloader
   class Preloader
     class Association
       def initialize(vertex, loaded, index)

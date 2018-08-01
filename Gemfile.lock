@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    raap (0.1.0)
+    fast_preloader (0.1.0)
       active_record_union
-      activerecord
+      activerecord (>= 5.0)
 
 GEM
   remote: https://rubygems.org/
@@ -50,7 +50,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.16)
-  raap!
+  fast_preloader!
   rake (~> 10.0)
   rspec (~> 3.0)
 

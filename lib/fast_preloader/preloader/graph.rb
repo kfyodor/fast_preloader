@@ -1,12 +1,12 @@
 require 'tsort'
 require 'set'
 
-module Raap
+module FastPreloader
   class Preloader
     class Graph
-      autoload :Edge, 'raap/preloader/graph/edge'
-      autoload :Vertex, 'raap/preloader/graph/vertex'
-      autoload :Root, 'raap/preloader/graph/root'
+      autoload :Edge, 'fast_preloader/preloader/graph/edge'
+      autoload :Vertex, 'fast_preloader/preloader/graph/vertex'
+      autoload :Root, 'fast_preloader/preloader/graph/root'
 
       include TSort
 
@@ -37,7 +37,7 @@ module Raap
       end
 
       def inspect
-        "<Raap::Graph vertices=#{@vertices.values}"
+        "<FastPreloader::Graph vertices=#{@vertices.values}"
       end
 
       def tsort

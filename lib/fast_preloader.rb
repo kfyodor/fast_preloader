@@ -1,8 +1,8 @@
-require 'raap/version'
-require 'raap/active_record'
+require 'fast_preloader/version'
+require 'fast_preloader/active_record'
 
-module Raap
-  autoload :Preloader, 'raap/preloader'
+module FastPreloader
+  autoload :Preloader, 'fast_preloader/preloader'
 
   # enabled custom preloaders globally
   def self.enable!
@@ -19,5 +19,5 @@ module Raap
 end
 
 ActiveSupport.on_load(:active_record) do
-  Raap::ActiveRecord.init
+  FastPreloader::ActiveRecord.init
 end

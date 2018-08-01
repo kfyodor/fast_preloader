@@ -1,19 +1,19 @@
-module Raap
+module FastPreloader
   module ActiveRecord
     module RelationExt
-      def with_raap(enabled = true)
-        @raap_enabled = enabled
+      def with_fast_preloader(enabled = true)
+        @fast_preloader_enabled = enabled
         self
       end
 
       def exec_queries(&block)
-        if raap_enabled?
+        if fast_preloader_enabled?
           @records = eager_loading? ? find_with_associations.freeze : @klass.find_by_sql(arel, bound_attributes, &block).freeze
 
           preload = preload_values
           preload += includes_values unless eager_loading?
 
-          Raap::Preloader.new.preload(@records, preload)
+          FastPreloader::Preloader.new.preload(@records, preload)
 
           @records.each(&:readonly!) if readonly_value
 
@@ -26,11 +26,11 @@ module Raap
 
       private
 
-      def raap_enabled?
-        if defined?(@raap_enabled)
-          @raap_enabled
+      def fast_preloader_enabled?
+        if defined?(@fast_preloader_enabled)
+          @fast_preloader_enabled
         else
-          @klass.raap_enabled?
+          @klass.fast_preloader_enabled?
         end
       end
     end

@@ -1,4 +1,4 @@
-module Raap
+module FastPreloader
   class Preloader
     class Index
       def initialize
