@@ -20,14 +20,15 @@ module Raap
       def add_edge(parent_reflection = nil, child_reflection, **edge_options)
         parent_vertex =
           if parent_reflection
-            klass = parent_reflection.klass
-            @vertices[klass.name] ||= Vertex.new(parent_reflection.klass)
+            parent_key = "#{parent_reflection.klass.name}0"
+            @vertices[parent_key] ||= Vertex.new(parent_reflection.klass)
           else
             @root
           end
 
-        child_klass = child_reflection.klass
-        child_vertex = @vertices[child_klass.name] ||= Vertex.new child_klass
+        child_level = self_reference?(parent_reflection, child_reflection, **edge_options) ? 1 : 0
+        child_key = "#{child_reflection.klass.name}#{child_level}"
+        child_vertex = @vertices[child_key] ||= Vertex.new child_reflection.klass, child_level
 
         Edge.new(parent_vertex, child_vertex, child_reflection, **edge_options).tap do |edge|
           edge.from.outgoing_edges << edge
@@ -44,6 +45,13 @@ module Raap
       end
 
       private
+
+      def self_reference?(parent, child, **opts)
+        if parent
+          through = opts[:through]
+          (parent.klass == child.klass) || (through && through.join_klass == child.klass)
+        end
+      end
 
       def tsort_each_node(&b)
         ([@root] + @vertices.values).each(&b)
