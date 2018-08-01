@@ -17,7 +17,7 @@ module Raap
         @vertices = {}
       end
 
-      def add_edge(parent_reflection = nil, child_reflection, skip_loading: false)
+      def add_edge(parent_reflection = nil, child_reflection, **edge_options)
         parent_vertex =
           if parent_reflection
             klass = parent_reflection.klass
@@ -29,11 +29,10 @@ module Raap
         child_klass = child_reflection.klass
         child_vertex = @vertices[child_klass.name] ||= Vertex.new child_klass
 
-        edge = Edge.new(parent_vertex, child_vertex, child_reflection, skip_loading: skip_loading)
-        edge.from.outgoing_edges << edge
-        edge.to.incoming_edges << edge
-
-        edge
+        Edge.new(parent_vertex, child_vertex, child_reflection, **edge_options).tap do |edge|
+          edge.from.outgoing_edges << edge
+          edge.to.incoming_edges << edge
+        end
       end
 
       def inspect

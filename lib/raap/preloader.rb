@@ -53,8 +53,8 @@ module Raap
     # TODO: test nested throughs
     def compile_through_association(graph, reflection, parent_reflection)
       through_reflection = reflection.through_reflection
-      graph.add_edge(parent_reflection, through_reflection, skip_loading: true)
-      graph.add_edge(through_reflection, reflection)
+      through_edge = graph.add_edge(parent_reflection, through_reflection, skip_loading: true)
+      graph.add_edge(through_reflection, reflection, through: through_edge)
     end
 
     def load_associations!(graph, root_klass, records, preload_scope)

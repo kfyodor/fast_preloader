@@ -37,13 +37,7 @@ module Raap
         return if edge.skip_loading?
 
         if edge.scope_key == record.__scope_key
-          find_owners(
-            edge.join_key,
-            edge.join_klass,
-            record.send(edge.primary_key),
-            edge.reflection,
-            edge.through
-          ).each do |owner|
+          find_owners(edge, record).each do |owner|
             assoc = owner.association(edge.reflection.name)
 
             # TODO are duplicate records possible in collection????
@@ -57,30 +51,25 @@ module Raap
         end
       end
 
-      def find_owners(key, klass, value, reflection, through)
-        if through
-          find_owners_for_through_association(key, klass, value, reflection)
+      def find_owners(edge, record)
+        if edge.through?
+          find_owners_for_through_association(edge, record)
         else
-          find_owners_for_association(key, klass, value, reflection)
+          find_owners_for_association(edge, record)
         end
       end
 
-      def find_owners_for_association(key, klass, value, reflection)
-        @index.get(klass, key, value).map do |i|
-          @loaded[klass.name][i]
+      def find_owners_for_association(edge, record)
+        value = record.send(edge.primary_key)
+
+        @index.get(edge.join_klass, edge.join_key, value).map do |i|
+          @loaded[edge.join_klass.name][i]
         end
       end
 
-      def find_owners_for_through_association(key, klass, value, reflection)
-        # TODO: refactor
-        through_reflection = reflection.through_reflection
-        through_key = through_reflection.send :join_fk
-        through_pkey = through_reflection.send :join_pk, through_reflection.klass
-        through_klass = through_reflection.active_record
-
-        find_owners_for_association(key, klass, value, reflection).flat_map do |middle_record|
-          value = middle_record.send through_pkey
-          find_owners_for_association(through_key, through_klass, value, through_reflection)
+      def find_owners_for_through_association(edge, record)
+        find_owners_for_association(edge, record).flat_map do |middle_record|
+          find_owners(edge.through, middle_record)
         end
       end
 

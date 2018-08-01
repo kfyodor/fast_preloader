@@ -6,18 +6,18 @@ module Raap
 
         DEFAULT_SCOPE_KEY = '_'.freeze
 
-        def initialize(from, to, reflection, skip_loading: false)
+        def initialize(from, to, reflection, through: nil, skip_loading: false)
           @from = from
           @to = to
           @reflection = reflection
 
+          # we need to keep a link to the parent edge here
+          @through = through
+          check_through!
+
           # indicates if an edge is used for fetchng middle records
           # in through association
           @skip_loading = skip_loading
-        end
-
-        def ignore?
-          @ignore
         end
 
         def join_klass
@@ -25,7 +25,7 @@ module Raap
         end
 
         def load_klass
-          if through
+          if through?
             @reflection.active_record
           else
             join_klass
@@ -68,7 +68,11 @@ module Raap
         end
 
         def through
-          @reflection.options[:through]
+          @through
+        end
+
+        def through?
+          !@through.nil?
         end
 
         def inspect
@@ -89,6 +93,12 @@ module Raap
         alias eql? ==
 
         private
+
+        def check_through!
+          if @through && !@reflection.options[:through]
+            raise "#{inspect} is not a \"through\" association"
+          end
+        end
 
         def reflection_for_key
           through ? @reflection.source_reflection : @reflection
