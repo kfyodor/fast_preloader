@@ -22,6 +22,7 @@ module Raap
 
         scope.each do |r|
           @loaded[klass.name] << r
+
           #TODO: we can index records for future scopes here insted of in #collected_ids
           #      (iterate through @vertex.outgoing_edges and collect keys)
           @vertex.each_edge { |e| associate_record!(r, e) }
@@ -33,16 +34,22 @@ module Raap
       private
 
       def associate_record!(record, edge)
+        return if edge.skip_loading?
+
         if edge.scope_key == record.__scope_key
           find_owners(
-            edge.join_klass,
             edge.join_key,
-            record.send(edge.primary_key)
-          ).each do |owner|
-            assoc = owner.association(edge.assoc.name)
+            edge.join_klass,
+            record.send(edge.primary_key),
+            edge.reflection,
+            edge.through
+          ).uniq.each do |owner|
+            assoc = owner.association(edge.reflection.name)
 
+            # TODO are duplicate records possible in collection????
             if edge.collection?
-              assoc.target << record
+              # include? check is slow here. maybe make edges uniq by assoc_name and load_klass????
+              assoc.target << record unless assoc.target.include?(record)
             else
               assoc.target = record unless assoc.target.present?
             end
@@ -50,21 +57,41 @@ module Raap
         end
       end
 
-      def find_owners(klass, key, value)
+      def find_owners(key, klass, value, reflection, through)
+        if through
+          find_owners_for_through_association(key, klass, value, reflection)
+        else
+          find_owners_for_association(key, klass, value, reflection)
+        end
+      end
+
+      def find_owners_for_association(key, klass, value, reflection)
         @index.get(klass, key, value).map do |i|
           @loaded[klass.name][i]
+        end
+      end
+
+      def find_owners_for_through_association(key, klass, value, reflection)
+        # TODO: refactor
+        through_reflection = reflection.through_reflection
+        through_key = through_reflection.send :join_fk
+        through_pkey = through_reflection.send :join_pk, through_reflection.klass
+        through_klass = through_reflection.active_record
+
+        find_owners_for_association(key, klass, value, reflection).flat_map do |middle_record|
+          value = middle_record.send through_pkey
+          find_owners_for_association(through_key, through_klass, value, through_reflection)
         end
       end
 
       def collected_ids
         @collected_ids ||= begin
           @vertex.each_edge.with_object({}) do |edge, result|
-            next if edge.through
-
             recs = @loaded[edge.join_klass.name] || []
             ids = recs.map(&edge.join_key.to_sym).compact
             next if ids.empty?
 
+            # TODO: see comment in #load!
             @index.index_by!(edge.join_klass, edge.join_key, recs)
 
             put_ids!(result, ids, edge)
@@ -122,10 +149,16 @@ module Raap
       # instead of indexing records and iterating over owners
       def mark_all_as_loaded!
         @vertex.each_edge do |e|
-          @loaded[e.join_klass.name].each do |r|
-            assoc = r.association(e.assoc.name)
-            assoc.loaded! unless assoc.loaded?
-          end
+          mark_edge_as_loaded!(e)
+        end
+      end
+
+      def mark_edge_as_loaded!(e)
+        return if e.skip_loading?
+
+        @loaded[e.load_klass.name].each do |r|
+          assoc = r.association(e.reflection.name)
+          assoc.loaded! unless assoc.loaded?
         end
       end
     end

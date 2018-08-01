@@ -31,6 +31,7 @@ Or install it yourself as:
 
 This gem is in early development so:
 - It doesn't have `through` assocs support yet (soon)
+- Doest't support polymorphic records yet
 - It cannot properly load self references (e.g. `User.has_one :inviter, class_name: 'User'`)
 - It cannot load circular references (User->Comment, Comment->User) yet. Rails can because each association it loads each assoc independently.
 

@@ -19,33 +19,42 @@ module Raap
 
     private
 
-    def compile_associations(graph, root_klass, associations, parent_node = nil)
+    def compile_associations(graph, root_klass, associations, parent_reflection = nil)
       Array.wrap(associations).flat_map do |assoc|
         case assoc
         when Hash
-          compile_hash(graph, root_klass, assoc, parent_node)
+          compile_hash(graph, root_klass, assoc, parent_reflection)
         when Symbol, String
-          compile_one(graph, root_klass, assoc.to_sym, parent_node)
+          compile_one(graph, root_klass, assoc.to_sym, parent_reflection)
         end
       end
     end
 
-    def compile_hash(graph, klass, associations, parent_node)
+    def compile_hash(graph, klass, associations, parent_reflection)
       associations.flat_map do |parent, child|
-        reflection = klass._reflect_on_association(parent)
-        parent_klass = reflection.klass
-
-        graph.add_edge(parent_node, reflection)
+        edge = compile_one(graph, klass, parent, parent_reflection)
 
         Array.wrap(child).flat_map do |assoc|
-          compile_associations(graph, parent_klass, assoc, reflection)
+          compile_associations(graph, edge.klass, assoc, edge.reflection)
         end
       end
     end
 
-    def compile_one(graph, klass, association, parent_node)
-      child = klass._reflect_on_association(association)
-      graph.add_edge(parent_node, child)
+    def compile_one(graph, klass, association, parent_reflection)
+      reflection = klass._reflect_on_association(association)
+
+      if reflection.options[:through]
+        compile_through_association(graph, reflection, parent_reflection)
+      else
+        graph.add_edge(parent_reflection, reflection)
+      end
+    end
+
+    # TODO: think about nested throughs
+    def compile_through_association(graph, reflection, parent_reflection)
+      through_reflection = reflection.through_reflection
+      graph.add_edge(parent_reflection, through_reflection, skip_loading: true)
+      graph.add_edge(through_reflection, reflection)
     end
 
     def load_associations!(graph, root_klass, records, preload_scope)
