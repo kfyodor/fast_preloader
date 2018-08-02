@@ -42,7 +42,7 @@ module FastPreloader
 
             # TODO are duplicate records possible in collection????
             if edge.collection?
-              # include? check is slow here. maybe make edges uniq by assoc_name and join_klassend_date
+              # include? check is slow here. maybe make edges uniq by assoc_name and join_klass
               assoc.target << record
             else
               assoc.target = record

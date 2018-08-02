@@ -39,28 +39,36 @@ TODO: perf, specs etc.
 
 ## Usage
 
-To use globally:
+Enable/disable globally:
 
 ```ruby
 # put it in config/initializers/fast_preloader.rb
 FastPreloader.enable!
 ```
 
-To use in a model
+... for a particular model
 
 ```ruby
 class SomeModel < ApplicationRecord
-  fast_preloader # enabled
-  fast_preloader true # same
-  fast_preloader false # disabled for this particular model
+  # enabled
+  fast_preloader
+  
+  # same
+  fast_preloader true 
+  
+  # disabled for this model if enabled globally
+  fast_preloader false 
 end
 ```
 
-To use in a scope
+... or for a particuar query or scope
 
 ```ruby
-SomeModel.includes(:some, associations: [:custom, :preloading]).with_fast_preloader # enable for query
-SomeModel.includes(:some, associations: [:rails, :preloading]).with_fast_preloader(false) # disable for query
+# enable for query
+SomeModel.use_fast_preloader.includes(:some, associations: [:custom, :preloading])
+
+# disable for query if enabled globally or for this model
+SomeModel.use_fast_preloader(false).includes(:some, associations: [:rails, :preloading]) 
 ```
 
 ## Development

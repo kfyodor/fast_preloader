@@ -1,8 +1,8 @@
 module FastPreloader
   module ActiveRecord
     module RelationExt
-      def with_fast_preloader(enabled = true)
-        @fast_preloader_enabled = enabled
+      def use_fast_preloader(enabled = true)
+        @use_preloader_enabled = enabled
         self
       end
 
@@ -27,8 +27,8 @@ module FastPreloader
       private
 
       def fast_preloader_enabled?
-        if defined?(@fast_preloader_enabled)
-          @fast_preloader_enabled
+        if defined?(@use_preloader_enabled)
+          @use_preloader_enabled
         else
           @klass.fast_preloader_enabled?
         end

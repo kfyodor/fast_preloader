@@ -29,6 +29,10 @@ module FastPreloader
           self._fast_preloader = enabled
         end
 
+        def use_fast_preloader(enabled = true)
+          all.use_fast_preloader(enabled)
+        end
+
         def fast_preloader_enabled?
           if self._fast_preloader.nil?
             FastPreloader.enabled?
