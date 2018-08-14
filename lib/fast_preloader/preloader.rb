@@ -43,6 +43,11 @@ module FastPreloader
     def compile_one(graph, klass, association, parent_reflection)
       reflection = klass._reflect_on_association(association)
 
+      unless reflection
+        Rails.logger.warn "[FastPreloader] Association #{association} is not defined on #{klass}, skipping..."
+        return
+      end
+
       if reflection.options[:through]
         compile_through_association(graph, reflection, parent_reflection)
       else
@@ -51,15 +56,34 @@ module FastPreloader
     end
 
     # TODO: test nested throughs
-    def compile_through_association(graph, reflection, parent_reflection)
+    def compile_through_association(graph, reflection, parent_reflection, skip_loading: false)
       through_reflection = reflection.through_reflection
-      through_edge = graph.add_edge(parent_reflection, through_reflection, skip_loading: true)
-      graph.add_edge(through_reflection, reflection, through: through_edge)
+
+      if through_reflection.options[:through]
+        # nested through
+        through_edge = compile_through_association(
+          graph,
+          through_reflection,
+          parent_reflection,
+          skip_loading: true
+        )
+
+        graph.add_edge(through_reflection, reflection, through: through_edge)
+      else
+        through_edge = graph.add_edge(parent_reflection, through_reflection, skip_loading: true)
+        graph.add_edge(through_reflection, reflection, through: through_edge, skip_loading: skip_loading)
+      end
     end
 
     def load_associations!(graph, root_klass, records, preload_scope)
       index = Index.new
       index.index_by!(root_klass, root_klass.primary_key, records)
+
+      # puts "====== DEBUG GRAPH ======"
+      # graph.tsort.each do |v|
+      #   puts v.inspect
+      # end
+      # puts "========================="
 
       graph.tsort.each_with_object({ root_klass.name => records }) do |v, loaded|
         load_association!(v, index, loaded, preload_scope)

@@ -76,7 +76,9 @@ module FastPreloader
         end
 
         def inspect
-          "#{from.klass}->#{to.klass}"
+          "#{from.klass}->#{to.klass}" +
+            (through? ? " through=<#{through.inspect}>" : '') +
+            (@skip_loading ? " skip_loading=true" : '')
         end
 
         def hash
