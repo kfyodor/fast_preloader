@@ -42,11 +42,11 @@ module FastPreloader
 
         # TODO: join_pk and join_fk are rails 5.1 only
         def primary_key
-          reflection_for_key.send(:join_pk, klass)
+          reflection_for_key.join_keys.key
         end
 
         def join_key
-          reflection_for_key.send(:join_fk)
+          reflection_for_key.join_keys.foreign_key
         end
 
         def scope

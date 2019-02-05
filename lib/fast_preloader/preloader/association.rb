@@ -117,7 +117,7 @@ module FastPreloader
           .scope_for_association
           .select(
             klass.arel_table[Arel.star],
-            "'#{scope_key}' as __scope_key"
+            "'#{scope_key}'::text as __scope_key"
           )
           .where(key => ids)
           .tap do |s|

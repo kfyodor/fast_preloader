@@ -1,14 +1,21 @@
 module FastPreloader
   module ActiveRecord
-    module RelationExt
-      def use_fast_preloader(enabled = true)
-        @use_preloader_enabled = enabled
-        self
-      end
-
+    module ExecQueryRelationExt
       def exec_queries(&block)
         if fast_preloader_enabled?
-          @records = eager_loading? ? find_with_associations.freeze : @klass.find_by_sql(arel, bound_attributes, &block).freeze
+          @records =
+            if eager_loading?
+              find_with_associations do |relation, join_dependency|
+                if ActiveRecord::NullRelation === relation
+                  []
+                else
+                  rows = connection.select_all(relation.arel, "SQL", relation.bound_attributes)
+                  join_dependency.instantiate(rows, &block)
+                end.freeze
+              end
+            else
+              klass.find_by_sql(arel, bound_attributes, &block).freeze
+            end
 
           preload = preload_values
           preload += includes_values unless eager_loading?
@@ -23,18 +30,8 @@ module FastPreloader
           super
         end
       end
-
-      private
-
-      def fast_preloader_enabled?
-        if defined?(@use_preloader_enabled)
-          @use_preloader_enabled
-        else
-          @klass.fast_preloader_enabled?
-        end
-      end
     end
 
-    ::ActiveRecord::Relation.prepend RelationExt
+    ::ActiveRecord::Relation.prepend ExecQueryRelationExt
   end
 end
