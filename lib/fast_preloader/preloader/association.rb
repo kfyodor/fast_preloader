@@ -45,7 +45,8 @@ module FastPreloader
               # include? check is slow here. maybe make edges uniq by assoc_name and join_klass
               assoc.target << record
             else
-              assoc.target = record
+              # can ||= cause any bugs? this is done to associate only a first record in case of has_one
+              assoc.target ||= record
             end
           end
         end
@@ -121,8 +122,8 @@ module FastPreloader
           )
           .where(key => ids)
           .tap do |s|
-          s.merge!(reflection_scope) if reflection_scope
-        end
+            s.merge!(reflection_scope) if reflection_scope
+          end
       end
 
       def put_ids!(store, ids, edge)
