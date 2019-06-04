@@ -120,7 +120,7 @@ module FastPreloader
             klass.arel_table[Arel.star],
             "'#{scope_key}'::text as __scope_key"
           )
-          .where(key => ids)
+          .where("#{key} = ANY(ARRAY[?])", ids)
           .tap do |s|
             s.merge!(reflection_scope) if reflection_scope
           end
